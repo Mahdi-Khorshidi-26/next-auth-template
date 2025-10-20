@@ -1,4 +1,4 @@
-import { PrismaAdapter } from "@auth/prisma-adapter";
+
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 import { prisma } from "./lib/prisma";
@@ -6,15 +6,22 @@ import Credentials from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  pages: {
+    signIn: "/login",
+  },
   callbacks: {
     jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.email = user.email;
       }
       return token;
     },
     session({ session, token }) {
-      session.user.id = token.id as string;
+      if (session.user) {
+        session.user.id = token.id as string;
+        session.user.email = token.email as string;
+      }
       return session;
     },
   },
@@ -40,10 +47,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             throw new Error("Incorrect password");
           }
         }
+        console.log("Authorized user ID:", {
+          id: user.id.toString(),
+          email: user.email,
+        });
         return { id: user.id.toString(), email: user.email };
       },
     }),
     GitHub,
   ],
-  adapter: PrismaAdapter(prisma),
 });

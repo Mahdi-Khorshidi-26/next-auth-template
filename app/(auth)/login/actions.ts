@@ -29,11 +29,12 @@ export async function login({
       };
     }
 
-    await signIn("credentials", {
+    const result = await signIn("credentials", {
       redirect: false,
       email: validatedData.data.email,
       password: validatedData.data.password,
     });
+    console.log("SignIn result:", result);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     return { error: true, message: "Incorrect email or password" };

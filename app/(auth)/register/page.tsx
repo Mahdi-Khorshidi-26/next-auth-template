@@ -24,6 +24,7 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import registerUser from "./actions";
 import Link from "next/link";
+import { login as loginWithGithub } from "@/lib/globalActions";
 
 const formSchema = z
   .object({
@@ -138,6 +139,13 @@ export default function Register() {
                         Register
                       </Button>
                     </CardAction>
+                    <Button
+                      type="button"
+                      className="cursor-pointer w-full mt-2 mb-2"
+                      onClick={loginWithGithub}
+                    >
+                      Signup with GitHub
+                    </Button>
                     <div className="text-muted-foreground text-sm">
                       Already have an account?{" "}
                       <Link href="/login" className="underline">

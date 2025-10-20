@@ -17,7 +17,7 @@ export async function changePassword({
 }) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
+    if (!session?.user?.email) {
       return { error: true, message: "No user currently logged in" };
     }
     const changePasswordSchema = z
@@ -34,7 +34,7 @@ export async function changePassword({
       return { error: true, message: "Invalid input" };
     }
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { email: session.user.email },
     });
 
     if (!user) {
@@ -46,7 +46,7 @@ export async function changePassword({
     }
     const hashedNewPassword = await hash(validatedData.data.password, 10);
     await prisma.user.update({
-      where: { id: session.user.id },
+      where: { email: session.user.email },
       data: { password: hashedNewPassword },
     });
 
