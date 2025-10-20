@@ -23,88 +23,111 @@ import { login as loginWithGithub } from "@/lib/globalActions";
 import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { resetPassword } from "./actions";
+import { useSearchParams } from "next/navigation";
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
 
 export default function PasswordResetPage() {
+  const searchParams = useSearchParams();
+  const initialEmail = searchParams.get("email") ?? "";
+
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
-      email: "",
+      email: decodeURIComponent(initialEmail),
     },
     resolver: zodResolver(formSchema),
   });
 
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
-    // const response = await registerUser(data);
-    // if (response?.error) {
-    //   form.setError("email", { message: response?.message });
-    // }
-    // console.log(data);
-    // console.log(response);
+    const response = await resetPassword(data);
+    if (response?.error) {
+      form.setError("email", { message: response?.message });
+    }
+    console.log(data);
+    console.log(response);
   };
 
   return (
     <main className="flex justify-center items-center min-h-screen">
-      <Card className="w-[350px]">
-        <CardHeader>
-          <CardTitle>Reset Password</CardTitle>
-          <CardDescription>Enter your email to reset your password</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)}>
-              <fieldset
-                className="space-y-4"
-                disabled={form.formState.isSubmitting}
-              >
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => {
-                    return (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="email" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
-                />
-                <CardFooter className="flex-col gap-2 px-0">
-                  <CardAction className="w-full">
-                    <Button type="submit" className="cursor-pointer w-full">
-                      Submit
+      {form.formState.isSubmitSuccessful ? (
+        <Card className="w-[350px]">
+          <CardHeader>
+            <CardTitle>Password Reset Requested</CardTitle>
+            <CardDescription>
+              If you have an account with the provided email, you will receive
+              instructions to reset your password to this email :
+              <p className="font-bold text-xl">{form.getValues("email")}</p>
+              <Link href="/login" className="underline">
+                Go to Login
+              </Link>
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      ) : (
+        <Card className="w-[350px]">
+          <CardHeader>
+            <CardTitle>Password Reset</CardTitle>
+            <CardDescription>
+              Enter your email to reset your password
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSubmit)}>
+                <fieldset
+                  className="space-y-4"
+                  disabled={form.formState.isSubmitting}
+                >
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => {
+                      return (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input placeholder="email" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  />
+                  <CardFooter className="flex-col gap-2 px-0">
+                    <CardAction className="w-full">
+                      <Button type="submit" className="cursor-pointer w-full">
+                        Submit
+                      </Button>
+                    </CardAction>
+                    <Button
+                      type="button"
+                      className="cursor-pointer w-full mt-2 mb-2"
+                      onClick={loginWithGithub}
+                    >
+                      Signup/Signin with GitHub
                     </Button>
-                  </CardAction>
-                  <Button
-                    type="button"
-                    className="cursor-pointer w-full mt-2 mb-2"
-                    onClick={loginWithGithub}
-                  >
-                    Signup/Signin with GitHub
-                  </Button>
-                  <div className="text-muted-foreground text-sm">
-                    Remember your password?{" "}
-                    <Link href="/login" className="underline">
-                      Log in
-                    </Link>
-                  </div>
-                  <div className="text-muted-foreground text-sm">
-                    Don&apos;t have an account?{" "}
-                    <Link href="/register" className="underline">
-                      Sign up
-                    </Link>
-                  </div>
-                </CardFooter>
-              </fieldset>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+                    <div className="text-muted-foreground text-sm">
+                      Remember your password?{" "}
+                      <Link href="/login" className="underline">
+                        Log in
+                      </Link>
+                    </div>
+                    <div className="text-muted-foreground text-sm">
+                      Don&apos;t have an account?{" "}
+                      <Link href="/register" className="underline">
+                        Sign up
+                      </Link>
+                    </div>
+                  </CardFooter>
+                </fieldset>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      )}
     </main>
   );
 }

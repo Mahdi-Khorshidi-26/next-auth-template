@@ -41,6 +41,8 @@ export default function Login() {
     },
     resolver: zodResolver(formSchema),
   });
+  const email = form.watch("email");
+  
 
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
     const response = await login(data);
@@ -127,7 +129,12 @@ export default function Login() {
                   </div>
                   <div className="text-muted-foreground text-sm">
                     Forgot your password?{" "}
-                    <Link href="/password-reset" className="underline">
+                    <Link
+                      href={`/password-reset${
+                        email ? `?email=${encodeURIComponent(email)}` : ""
+                      }`}
+                      className="underline"
+                    >
                       Reset my password
                     </Link>
                   </div>
