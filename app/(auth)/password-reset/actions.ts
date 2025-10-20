@@ -1,4 +1,5 @@
 "use server";
+import { mailer } from "@/lib/email";
 import { getUserFromDatabase, userLoggedInStatus } from "@/lib/globalActions";
 import { prisma } from "@/lib/prisma";
 import { randomBytes } from "crypto";
@@ -49,11 +50,19 @@ export async function resetPassword({ email }: { email: string }) {
     });
 
     // Send password reset email
-    const resetLink = `${
-      process.env.NEXT_PUBLIC_BASE_URL
-    }/update-password?token=${passwordResetToken}&email=${encodeURIComponent(
-      validatedData.data.email
-    )}`;
+    const resetLink = `${process.env.NEXT_PUBLIC_BASE_URL}/update-password?token=${passwordResetToken}&email=${validatedData.data.email}`;
+    console.log("Reset Link:", resetLink);
+
+    await mailer.sendMail({
+      from: "test@resend.dev",
+      subject: "Your Password Reset Link",
+      to: validatedData.data.email,
+      html: `Click the following link to reset your password: 
+        this link is going to expire in 1 hour :
+      <a href="${resetLink}">Reset Password</a>
+      or copy and paste this URL into your browser: ${resetLink}
+      `,
+    });
 
     return { error: false, message: "Password reset link sent to email" };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
