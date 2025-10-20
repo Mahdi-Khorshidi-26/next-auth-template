@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"; // 62.7k (gzipped: 20.5k)
 import type { NextRequest } from "next/server";
 import { auth } from "@/auth";
 
-const protectedRoutes = ["/dashboard"];
+const protectedRoutes = ["/dashboard", "my-account", "change-password"];
 
 export default async function middleware(request: NextRequest) {
   const session = await auth();

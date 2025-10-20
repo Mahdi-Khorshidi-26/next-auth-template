@@ -4,7 +4,6 @@ import {
   Card,
   CardAction,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -18,37 +17,37 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import passwordMatchValidationSchema from "@/validation/passwordMatchValidation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import z from "zod";
-import { login } from "./actions";
 import passwordValidationSchema from "@/validation/passwordValidation";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { login as loginWithGithub } from "@/lib/globalActions";
+import { changePassword } from "./actions";
+import { toast } from "sonner";
 
-const formSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: passwordValidationSchema,
-});
+const formSchema = z
+  .object({
+    currentPassword: passwordValidationSchema,
+  })
+  .and(passwordMatchValidationSchema);
 
-export default function Login() {
-  const router = useRouter();
+export default function ChangePasswordPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
-      email: "",
+      currentPassword: "",
       password: "",
+      confirmPassword: "",
     },
     resolver: zodResolver(formSchema),
   });
 
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
-    const response = await login(data);
+    const response = await changePassword(data);
     if (response?.error) {
       form.setError("root", { message: response?.message });
-    } else {
-      router.push("/my-account");
     }
+    form.reset();
+    toast.success("Password has been changed successfully");
     console.log(data);
     console.log(response);
   };
@@ -57,8 +56,7 @@ export default function Login() {
     <main className="flex justify-center items-center min-h-screen">
       <Card className="w-[350px]">
         <CardHeader>
-          <CardTitle>Login</CardTitle>
-          <CardDescription>Login to your account</CardDescription>
+          <CardTitle className="text-2xl">Change Password</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -69,13 +67,13 @@ export default function Login() {
               >
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="currentPassword"
                   render={({ field }) => {
                     return (
                       <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <FormLabel>Current Password</FormLabel>
                         <FormControl>
-                          <Input placeholder="email" {...field} />
+                          <Input placeholder="Current Password" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -88,10 +86,29 @@ export default function Login() {
                   render={({ field }) => {
                     return (
                       <FormItem>
-                        <FormLabel>Password</FormLabel>
+                        <FormLabel>New Password</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="password"
+                            placeholder="New Password"
+                            {...field}
+                            type="password"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
+                />
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => {
+                    return (
+                      <FormItem>
+                        <FormLabel>Confirm New Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Confirm New Password"
                             {...field}
                             type="password"
                           />
@@ -103,34 +120,15 @@ export default function Login() {
                 />
                 <CardFooter className="flex-col gap-2 px-0">
                   <CardAction className="w-full">
-                    {!!form.formState.errors.root?.message && (
-                      <FormMessage>
+                    {!!form.formState.errors.root && (
+                      <FormMessage className="text-center mb-2">
                         {form.formState.errors.root.message}
                       </FormMessage>
                     )}
                     <Button type="submit" className="cursor-pointer w-full">
-                      Login
+                      Change Password
                     </Button>
                   </CardAction>
-                  <Button
-                    type="button"
-                    className="cursor-pointer w-full mt-2 mb-2"
-                    onClick={loginWithGithub}
-                  >
-                    Login with GitHub
-                  </Button>
-                  <div className="text-muted-foreground text-sm">
-                    Don&apos;t have an account?{" "}
-                    <Link href="/register" className="underline">
-                      Register
-                    </Link>
-                  </div>
-                  <div className="text-muted-foreground text-sm">
-                    Forgot your password?{" "}
-                    <Link href="/password-reset" className="underline">
-                      Reset my password
-                    </Link>
-                  </div>
                 </CardFooter>
               </fieldset>
             </form>
