@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import UpdatePasswordForm from "./updatePasswordForm";
 
 export default async function UpdatePasswordPage({
   searchParams,
@@ -44,7 +45,7 @@ export default async function UpdatePasswordPage({
         </CardHeader>
         <CardContent>
           {tokenIsValid ? (
-            <div>update password form</div>
+            <UpdatePasswordForm token={token ?? ""} />
           ) : (
             <Link className="underline" href={"/password-reset"}>
               Request new password reset

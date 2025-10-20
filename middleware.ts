@@ -6,8 +6,6 @@ const protectedRoutes = [
   "/dashboard",
   "/my-account",
   "/change-password",
-  "/password-reset",
-  "/update-password",
 ];
 
 export default async function middleware(request: NextRequest) {
