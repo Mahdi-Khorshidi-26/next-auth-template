@@ -1,25 +1,23 @@
 "use server";
-import { auth } from "@/auth";
+import { getUserFromDatabase } from "@/lib/globalActions";
 import { prisma } from "@/lib/prisma";
 import passwordMatchValidationSchema from "@/validation/passwordMatchValidation";
-import { compare, hash } from "bcryptjs";
-import { error } from "console";
+import { hash } from "bcryptjs";
 
 export async function updatePassword({
   password,
   confirmPassword,
   token,
+  email,
 }: {
   password: string;
   confirmPassword: string;
   token: string;
+  email: string;
 }) {
   try {
     let tokenIsValid = false;
-    const session = await auth();
-    if (!session?.user?.email) {
-      return { error: true, message: "No user currently logged in" };
-    }
+    const user = await getUserFromDatabase(email);
     const updatePasswordSchema = passwordMatchValidationSchema;
     const validatedData = updatePasswordSchema.safeParse({
       password,
@@ -52,22 +50,20 @@ export async function updatePassword({
       return { error: true, message: "Invalid or expired token", tokenIsValid };
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
     if (!user) {
       return { error: true, message: "User not found", tokenIsValid };
     }
     const hashedNewPassword = await hash(validatedData.data.password, 10);
     await prisma.user.update({
-      where: { email: session.user.email },
+      where: { email: user.email },
       data: { password: hashedNewPassword },
     });
 
-    await prisma.passwordResetToken.delete({
-      where: { token },
-    });
+    if (token) {
+      await prisma.passwordResetToken.delete({
+        where: { token },
+      });
+    }
 
     return {
       error: false,

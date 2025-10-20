@@ -48,6 +48,13 @@ export async function resetPassword({ email }: { email: string }) {
       },
     });
 
+    // Send password reset email
+    const resetLink = `${
+      process.env.NEXT_PUBLIC_BASE_URL
+    }/update-password?token=${passwordResetToken}&email=${encodeURIComponent(
+      validatedData.data.email
+    )}`;
+
     return { error: false, message: "Password reset link sent to email" };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {

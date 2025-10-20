@@ -12,19 +12,23 @@ import UpdatePasswordForm from "./updatePasswordForm";
 export default async function UpdatePasswordPage({
   searchParams,
 }: {
-  searchParams: Promise<{ token?: string }>;
+  searchParams: Promise<{ token?: string; email?: string }>;
 }) {
   const searchParamsValues = await searchParams;
   let tokenIsValid = false;
-  const { token } = searchParamsValues;
-
+  const { token, email } = searchParamsValues;
+  const decodedEmail = email ? decodeURIComponent(email) : "";
   if (token) {
     const passwordResetToken = await prisma.passwordResetToken.findUnique({
       where: { token },
     });
     const now = Date.now();
     const databaseToken = passwordResetToken?.token;
-    if (passwordResetToken && databaseToken && passwordResetToken.expiresAt.getTime() > now) {
+    if (
+      passwordResetToken &&
+      databaseToken &&
+      passwordResetToken.expiresAt.getTime() > now
+    ) {
       tokenIsValid = true;
     }
   }
@@ -41,7 +45,7 @@ export default async function UpdatePasswordPage({
         </CardHeader>
         <CardContent>
           {tokenIsValid ? (
-            <UpdatePasswordForm token={token ?? ""} />
+            <UpdatePasswordForm token={token ?? ""} email={decodedEmail} />
           ) : (
             <Link className="underline" href={"/password-reset"}>
               Request new password reset

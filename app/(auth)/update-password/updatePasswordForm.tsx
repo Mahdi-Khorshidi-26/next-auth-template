@@ -27,7 +27,13 @@ import Link from "next/link";
 
 const formSchema = passwordMatchValidationSchema;
 
-export default function UpdatePasswordForm({ token }: { token: string }) {
+export default function UpdatePasswordForm({
+  token,
+  email,
+}: {
+  token: string;
+  email: string;
+}) {
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
       password: "",
@@ -41,6 +47,7 @@ export default function UpdatePasswordForm({ token }: { token: string }) {
       password: data.password,
       confirmPassword: data.confirmPassword,
       token,
+      email,
     });
 
     if (response?.tokenIsValid) {
