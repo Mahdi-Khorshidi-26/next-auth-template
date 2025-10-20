@@ -18,20 +18,16 @@ export default async function UpdatePasswordPage({
   let tokenIsValid = false;
   const { token } = searchParamsValues;
 
-  if (token && token.length === 36) {
+  if (token) {
     const passwordResetToken = await prisma.passwordResetToken.findUnique({
       where: { token },
     });
-
     const now = Date.now();
-    if (
-      !!passwordResetToken?.token &&
-      passwordResetToken.expiresAt.getTime() < now
-    ) {
+    const databaseToken = passwordResetToken?.token;
+    if (passwordResetToken && databaseToken && passwordResetToken.expiresAt.getTime() > now) {
       tokenIsValid = true;
     }
   }
-
   return (
     <main className="flex justify-center items-center min-h-screen">
       <Card className="w-[350px]">

@@ -23,6 +23,7 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import { toast } from "sonner";
 import { updatePassword } from "./actions";
+import Link from "next/link";
 
 const formSchema = passwordMatchValidationSchema;
 
@@ -41,6 +42,11 @@ export default function UpdatePasswordForm({ token }: { token: string }) {
       confirmPassword: data.confirmPassword,
       token,
     });
+
+    if (response?.tokenIsValid) {
+      window.location.reload();
+    }
+
     if (response?.error) {
       form.setError("root", { message: response?.message });
     }
@@ -51,73 +57,75 @@ export default function UpdatePasswordForm({ token }: { token: string }) {
   };
 
   return (
-    <main className="flex justify-center items-center min-h-screen">
-      <Card className="w-[350px]">
-        <CardHeader>
-          <CardTitle className="text-2xl">Change Password</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)}>
-              <fieldset
-                className="space-y-4"
-                disabled={form.formState.isSubmitting}
-              >
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => {
-                    return (
-                      <FormItem>
-                        <FormLabel>New Password</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="New Password"
-                            {...field}
-                            type="password"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
-                />
-                <FormField
-                  control={form.control}
-                  name="confirmPassword"
-                  render={({ field }) => {
-                    return (
-                      <FormItem>
-                        <FormLabel>Confirm New Password</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Confirm New Password"
-                            {...field}
-                            type="password"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
-                />
-                <CardFooter className="flex-col gap-2 px-0">
-                  <CardAction className="w-full">
-                    {!!form.formState.errors.root && (
-                      <FormMessage className="text-center mb-2">
-                        {form.formState.errors.root.message}
-                      </FormMessage>
-                    )}
-                    <Button type="submit" className="cursor-pointer w-full">
-                      Update Password
-                    </Button>
-                  </CardAction>
-                </CardFooter>
-              </fieldset>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </main>
+    <>
+      {form.formState.isSubmitSuccessful ? (
+        <div>
+          Your password has been changed successfully
+          <Link href="/login" className="underline">
+            Go to login
+          </Link>
+        </div>
+      ) : (
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)}>
+            <fieldset
+              className="space-y-4"
+              disabled={form.formState.isSubmitting}
+            >
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <FormLabel>New Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="New Password"
+                          {...field}
+                          type="password"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <FormLabel>Confirm New Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Confirm New Password"
+                          {...field}
+                          type="password"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+              <CardFooter className="flex-col gap-2 px-0">
+                <CardAction className="w-full">
+                  {!!form.formState.errors.root && (
+                    <FormMessage className="text-center mb-2">
+                      {form.formState.errors.root.message}
+                    </FormMessage>
+                  )}
+                  <Button type="submit" className="cursor-pointer w-full">
+                    Update Password
+                  </Button>
+                </CardAction>
+              </CardFooter>
+            </fieldset>
+          </form>
+        </Form>
+      )}
+    </>
   );
 }
