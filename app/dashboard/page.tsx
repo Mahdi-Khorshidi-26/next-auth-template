@@ -3,7 +3,7 @@ import { login, logout, userLoggedInStatus } from "@/lib/globalActions";
 import { log } from "console";
 import Image from "next/image";
 
-export default async function Home() {
+export default async function DashboardPage() {
   const session = await auth();
   const loggedIn = await userLoggedInStatus();
 
@@ -12,9 +12,10 @@ export default async function Home() {
   } else {
     log("User is not logged in");
   }
+
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <h1 className="text-4xl font-bold">Welcome to NextAuth</h1>
+      <h1 className="text-4xl font-bold">Welcome to Dashboard</h1>
       <p>{loggedIn ? "You are logged in" : "You are not logged in"}</p>
       <p>{loggedIn && session ? session?.user?.name : ""}</p>
       <p>{loggedIn && session ? session?.user?.email : ""}</p>
